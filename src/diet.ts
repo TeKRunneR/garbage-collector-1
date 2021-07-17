@@ -42,6 +42,7 @@ import { $class, $effect, $item, $items, $skill, get, have, $familiar, set } fro
 import { withChoice } from "libram/dist/property";
 import { globalOptions } from ".";
 import { clamp, ensureEffect } from "./lib";
+import { synthesize } from "./synthesis";
 
 const MPA = get("valueOfAdventure");
 print(`Using adventure value ${MPA}.`, "blue");
@@ -215,9 +216,7 @@ function fillSpleenWith(spleenItem: Item) {
         (30 + 1.04 * adventuresPerItem)
     );
     if (have($skill`Sweet Synthesis`)) {
-      for (let i = 0; i < clamp(spleenSynth, 0, spleenLimit() - mySpleenUse()); i++) {
-        sweetSynthesis($effect`Synthesis: Greed`);
-      }
+      synthesize($effect`Synthesis: Greed`, clamp(spleenSynth, 0, spleenLimit() - mySpleenUse()));
     }
     const count = Math.floor((spleenLimit() - mySpleenUse()) / spleenItem.spleen);
     acquire(count, spleenItem);
