@@ -86,9 +86,9 @@ import {
   prepWandererZone,
   questStep,
   Requirement,
+  saleValue,
   setChoice,
   sum,
-  trueValue,
 } from "./lib";
 import { freeFightMood, meatMood } from "./mood";
 import {
@@ -477,7 +477,7 @@ const witchessPieces = [
 ];
 
 function bestWitchessPiece() {
-  return witchessPieces.sort((a, b) => trueValue(b.drop) - trueValue(a.drop))[0].piece;
+  return witchessPieces.sort((a, b) => saleValue(b.drop) - saleValue(a.drop))[0].piece;
 }
 
 export function dailyFights(): void {
