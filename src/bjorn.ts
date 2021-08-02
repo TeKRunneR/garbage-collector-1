@@ -27,19 +27,19 @@ const bjornFams: BjornedFamiliar[] = [
     familiar: $familiar`Puck Man`,
     meatVal: () => trueValue($item`yellow pixel`),
     probability: 0.25,
-    dropPredicate: () => get("_yellowPixelDropsCrown") < 25,
+    hasDropsRemaining: () => get("_yellowPixelDropsCrown") < 25,
   },
   {
     familiar: $familiar`Ms. Puck Man`,
     meatVal: () => trueValue($item`yellow pixel`),
     probability: 0.25,
-    dropPredicate: () => get("_yellowPixelDropsCrown") < 25,
+    hasDropsRemaining: () => get("_yellowPixelDropsCrown") < 25,
   },
   {
     familiar: $familiar`Grimstone Golem`,
     meatVal: () => trueValue($item`grimstone mask`),
     probability: 0.5,
-    dropPredicate: () => get("_grimstoneMaskDropsCrown") < 1,
+    hasDropsRemaining: () => get("_grimstoneMaskDropsCrown") < 1,
   },
   {
     familiar: $familiar`Knob Goblin Organ Grinder`,
@@ -63,7 +63,7 @@ const bjornFams: BjornedFamiliar[] = [
     familiar: $familiar`Garbage Fire`,
     meatVal: () => trueValue($item`burning newspaper`),
     probability: 0.5,
-    dropPredicate: () => get("_garbageFireDropsCrown") < 3,
+    hasDropsRemaining: () => get("_garbageFireDropsCrown") < 3,
   },
   {
     familiar: $familiar`Machine Elf`,
@@ -72,13 +72,13 @@ const bjornFams: BjornedFamiliar[] = [
         ...$items`abstraction: sensation, abstraction: thought, abstraction: action, abstraction: category, abstraction: perception, abstraction: purpose`
       ),
     probability: 0.2,
-    dropPredicate: () => get("_abstractionDropsCrown") < 25,
+    hasDropsRemaining: () => get("_abstractionDropsCrown") < 25,
   },
   {
     familiar: $familiar`Trick-or-Treating Tot`,
     meatVal: () => trueValue($item`hoarded candy wad`),
     probability: 0.5,
-    dropPredicate: () => get("_hoardedCandyDropsCrown") < 3,
+    hasDropsRemaining: () => get("_hoardedCandyDropsCrown") < 3,
   },
   {
     familiar: $familiar`Warbear Drone`,
@@ -103,13 +103,13 @@ const bjornFams: BjornedFamiliar[] = [
     familiar: $familiar`Grim Brother`,
     meatVal: () => trueValue($item`grim fairy tale`),
     probability: 1,
-    dropPredicate: () => get("_grimFairyTaleDropsCrown") < 2,
+    hasDropsRemaining: () => get("_grimFairyTaleDropsCrown") < 2,
   },
   {
     familiar: $familiar`Optimistic Candle`,
     meatVal: () => trueValue($item`glob of melted wax`),
     probability: 1,
-    dropPredicate: () => get("_optimisticCandleDropsCrown") < 3,
+    hasDropsRemaining: () => get("_optimisticCandleDropsCrown") < 3,
     modifier: {
       type: BjornModifierType.ITEM,
       modifier: 15,
@@ -122,7 +122,7 @@ const bjornFams: BjornedFamiliar[] = [
         ...$items`teflon ore, velcro ore, vinyl ore, cardboard ore, styrofoam ore, bubblewrap ore`
       ),
     probability: 1,
-    dropPredicate: () => get("_oreDropsCrown") < 6,
+    hasDropsRemaining: () => get("_oreDropsCrown") < 6,
     modifier: {
       type: BjornModifierType.ITEM,
       modifier: 15,
@@ -132,7 +132,7 @@ const bjornFams: BjornedFamiliar[] = [
     familiar: $familiar`Twitching Space Critter`,
     meatVal: () => trueValue($item`space beast fur`),
     probability: 1,
-    dropPredicate: () => get("_spaceFurDropsCrown") < 1,
+    hasDropsRemaining: () => get("_spaceFurDropsCrown") < 1,
   },
   {
     familiar: $familiar`Party Mouse`,
