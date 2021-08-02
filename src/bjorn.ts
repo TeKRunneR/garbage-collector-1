@@ -1,7 +1,7 @@
-import { myFamiliar, numericModifier } from "kolmafia";
+import { myBjornedFamiliar, myEnthronedFamiliar, myFamiliar, numericModifier } from "kolmafia";
 import { $familiar, $item, $items, get, have } from "libram";
 import { meatFamiliar } from "./familiar";
-import { baseMeat, trueValue } from "./lib";
+import { baseMeat, enumValues, trueValue } from "./lib";
 
 enum BjornModifierType {
   MEAT,
@@ -19,7 +19,7 @@ type BjornedFamiliar = {
   meatVal: () => number;
   probability: number;
   modifier?: BjornModifier;
-  dropPredicate?: () => boolean;
+  hasDropsRemaining?: () => boolean;
 };
 
 const bjornFams: BjornedFamiliar[] = [
@@ -495,55 +495,63 @@ export enum PickBjornMode {
   DMT,
 }
 
-const bjornLists: Map<PickBjornMode, BjornedFamiliar[]> = new Map();
-
-function generateBjornList(mode: PickBjornMode): BjornedFamiliar[] {
-  const additionalValue = (familiar: BjornedFamiliar) => {
-    if (!familiar.modifier) return 0;
-    const meatVal = [PickBjornMode.DMT, PickBjornMode.FREE].includes(mode)
-      ? 0
-      : baseMeat + (mode === PickBjornMode.EMBEZZLER ? 750 : 0);
-    const itemVal = mode === PickBjornMode.BARF ? 72 : 0;
-    if (familiar.modifier.type === BjornModifierType.MEAT)
-      return (familiar.modifier.modifier * meatVal) / 100;
-    if (familiar.modifier.type === BjornModifierType.ITEM)
-      return (familiar.modifier.modifier * itemVal) / 100;
-    if (familiar.modifier.type === BjornModifierType.FMWT) {
-      const lepMultiplier = numericModifier(meatFamiliar(), "Leprechaun", 1, Item.get("none"));
-      const fairyMultiplier = numericModifier(meatFamiliar(), "Fairy", 1, Item.get("none"));
-      return (
-        (meatVal * (10 * lepMultiplier + 5 * Math.sqrt(lepMultiplier)) +
-          itemVal * (5 * fairyMultiplier + 2.5 * Math.sqrt(fairyMultiplier))) /
-        100
-      );
-    }
-    return 0;
-  };
-  return [...bjornFams].sort(
-    (a, b) =>
-      (!b.dropPredicate ||
-      (b.dropPredicate() && ![PickBjornMode.EMBEZZLER, PickBjornMode.DMT].includes(mode))
-        ? b.meatVal() * b.probability
-        : 0) +
-      additionalValue(b) -
-      ((!a.dropPredicate ||
-      (a.dropPredicate() && ![PickBjornMode.EMBEZZLER, PickBjornMode.DMT].includes(mode))
-        ? a.meatVal() * a.probability
-        : 0) +
-        additionalValue(a))
-  );
+function modifierValue(mode: PickBjornMode, familiar: BjornedFamiliar) {
+  if (!familiar.modifier) return 0;
+  const meatVal = [PickBjornMode.DMT, PickBjornMode.FREE].includes(mode)
+    ? 0
+    : baseMeat + (mode === PickBjornMode.EMBEZZLER ? 750 : 0);
+  const itemVal = mode === PickBjornMode.BARF ? 72 : 0;
+  if (familiar.modifier.type === BjornModifierType.MEAT) {
+    return (familiar.modifier.modifier * meatVal) / 100;
+  } else if (familiar.modifier.type === BjornModifierType.ITEM) {
+    return (familiar.modifier.modifier * itemVal) / 100;
+  } else if (familiar.modifier.type === BjornModifierType.FMWT) {
+    const lepMultiplier = numericModifier(meatFamiliar(), "Leprechaun", 1, Item.get("none"));
+    const fairyMultiplier = numericModifier(meatFamiliar(), "Fairy", 1, Item.get("none"));
+    return (
+      (meatVal * (10 * lepMultiplier + 5 * Math.sqrt(lepMultiplier)) +
+        itemVal * (5 * fairyMultiplier + 2.5 * Math.sqrt(fairyMultiplier))) /
+      100
+    );
+  }
+  return 0;
 }
 
-export function pickBjorn(mode: PickBjornMode = PickBjornMode.FREE): BjornedFamiliar {
-  if (!bjornLists.has(mode)) {
-    bjornLists.set(mode, generateBjornList(mode));
+function dropValue(mode: PickBjornMode, familiar: BjornedFamiliar) {
+  return !familiar.hasDropsRemaining ||
+    (familiar.hasDropsRemaining() && ![PickBjornMode.EMBEZZLER, PickBjornMode.DMT].includes(mode))
+    ? familiar.meatVal() * familiar.probability
+    : 0;
+}
+
+function totalValue(mode: PickBjornMode, familiar: BjornedFamiliar) {
+  return modifierValue(mode, familiar) + dropValue(mode, familiar);
+}
+
+function rankBjornFamiliars(mode: PickBjornMode): BjornedFamiliar[] {
+  return [...bjornFams].sort((a, b) => totalValue(mode, b) - totalValue(mode, a));
+}
+
+const bjornFamiliarRankings: Map<PickBjornMode, BjornedFamiliar[]> = new Map(
+  enumValues(PickBjornMode).map((mode) => [mode, rankBjornFamiliars(mode)])
+);
+
+export function pickBjorn(mode = PickBjornMode.FREE, bjornAlike: Item): BjornedFamiliar {
+  const bjornFamiliarRanking = bjornFamiliarRankings.get(mode);
+  if (!bjornFamiliarRanking || bjornFamiliarRanking.length === 0) {
+    throw new Error("Something went wrong while selecting a familiar to bjornify or crownulate");
   }
-  const bjornList = bjornLists.get(mode);
-  if (bjornList) {
-    while (bjornList[0].dropPredicate && !bjornList[0].dropPredicate()) bjornList.shift();
-    if (myFamiliar() !== bjornList[0].familiar) return bjornList[0];
-    while (bjornList[1].dropPredicate && !bjornList[1].dropPredicate()) bjornList.splice(1, 1);
-    return bjornList[1];
-  }
-  throw new Error("Something went wrong while selecting a familiar to bjornify or crownulate");
+
+  const otherBjorned =
+    bjornAlike === $item`Buddy Bjorn` ? myEnthronedFamiliar() : myBjornedFamiliar();
+
+  const result = bjornFamiliarRanking.find(
+    (familiar) =>
+      familiar.familiar !== myFamiliar() &&
+      familiar.familiar !== otherBjorned &&
+      !(familiar.hasDropsRemaining && familiar.hasDropsRemaining())
+  );
+
+  if (!result) throw new Error("Can't find any valid familiar to put in the Bjorn.");
+  return result;
 }

@@ -88,6 +88,11 @@ export function argmax<T>(values: [T, number][]): T {
   )[0];
 }
 
+// Modified version of https://www.petermorlion.com/iterating-a-typescript-enum/
+export function enumValues<O, K extends keyof O = keyof O, V extends O[K] = O[K]>(obj: O): V[] {
+  return (Object.keys(obj).filter((k) => Number.isNaN(+k)) as K[]).map((k) => obj[k]) as V[];
+}
+
 export function questStep(questName: string): number {
   const stringStep = property.getString(questName);
   if (stringStep === "unstarted" || stringStep === "") return -1;
