@@ -43,8 +43,8 @@ import {
   get,
   have,
   set,
+  withChoice,
 } from "libram";
-import { withChoice } from "libram/dist/property";
 import { acquire } from "./acquire";
 import { estimatedTurns, globalOptions } from "./globalvars";
 import { clamp, ensureEffect } from "./lib";

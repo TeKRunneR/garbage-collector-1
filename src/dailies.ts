@@ -39,8 +39,11 @@ import {
   have,
   Macro,
   property,
+  set,
   SongBoom,
   SourceTerminal,
+  withChoice,
+  withChoices,
 } from "libram";
 import { horseradish } from "./diet";
 import { meatFamiliar } from "./familiar";
@@ -55,7 +58,6 @@ import {
 } from "./lib";
 import { freeFightOutfit } from "./outfit";
 import { withStash } from "./clan";
-import { set, withChoice, withChoices } from "libram/dist/property";
 import { estimatedTurns } from "./globalvars";
 
 export function voterSetup(): void {
